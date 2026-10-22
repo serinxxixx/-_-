@@ -85,6 +85,7 @@ if (root !== document.body){
 }
 var page = root.querySelector('.page') || document.getElementById('page');
 if (root !== document.body) root.classList.add('k-js');
+if (root !== document.body){ root.style.setProperty('overflow', 'visible', 'important'); root.style.setProperty('display', 'flow-root', 'important'); }
 function inRoot(el){ return root === document.body || (el && root.contains(el)); }
 var PAGE_W = 860;
 var FRAMED = false; try { FRAMED = window.parent && window.parent !== window; } catch (e) { FRAMED = true; }
@@ -170,7 +171,7 @@ box.classList.add('open'); root.classList.add('serin-lightbox-open'); if (EMB())
 }
 function closeLightbox(){
 var box = root.querySelector('.serin-image-lightbox');
-if (box && box.classList.contains('open')){ box.classList.remove('open'); document.body.style.overflow = ''; }
+if (box && box.classList.contains('open')){ box.classList.remove('open'); if (!EMB()) document.body.style.overflow = ''; }
 root.classList.remove('serin-lightbox-open');
 }
 function copyForm(btn, silent){
@@ -380,7 +381,12 @@ window.addEventListener('load', function(){ fit(); setTimeout(post, 300); });
 if (FRAMED){
 window.addEventListener('message', function(e){
 var d = e.data || {}; if (d.type !== 'serinView') return;
+var first = !view.on;
 view.top = +d.top || 0; view.h = +d.h || 0; view.on = true;
+if (first){
+[document.documentElement, document.body].forEach(function(el){ el.style.setProperty('overflow', 'hidden', 'important'); });
+lastH = 0; post();
+}
 try { window.dispatchEvent(new Event('serin-view')); } catch (er) {}
 window.dispatchEvent(new Event('scroll'));
 var lb = root.querySelector('.serin-image-lightbox.open'); if (lb) placeInView(lb);
