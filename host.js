@@ -1,11 +1,8 @@
 /* Serin detail page - Artmug host helper (loaded from GitHub Pages by the Artmug snippet) */
 (function(){
-  if (window.__serinHost) return; window.__serinHost = 1;
+  /* optional extras: the Artmug snippet itself handles sizing/messages; this file only adds helpers it calls if present */
+  if (window.serinHostX) return;
   var f = document.getElementById('serin-frame'); if (!f) return;
-  var me = document.currentScript;
-  var O = '';
-  try { O = new URL((me && me.src) || f.src).origin; } catch (e) {}
-  if (!O) return;
   var MOBILE = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '') || (window.innerWidth || 1000) < 768;
 
   function imp(el, p, v){ try { el.style.setProperty(p, v, 'important'); } catch (e) {} }
@@ -33,12 +30,6 @@
       if (/(auto|scroll)/.test(cs.overflowY) && el.scrollHeight > el.clientHeight + 2) return el;
     }
     return null;
-  }
-  function view(){
-    try {
-      var r = f.getBoundingClientRect();
-      f.contentWindow.postMessage({ type: 'serinView', top: Math.max(0, -r.top), h: window.innerHeight || document.documentElement.clientHeight }, O);
-    } catch (e) {}
   }
   function scrollToY(top){
     var d = f.getBoundingClientRect().top + (top || 0) - (MOBILE ? 64 : 20);
@@ -79,20 +70,7 @@
     var q = document.getElementById('cont_qna') || document.getElementById('ankerQ');
     if (q){ try { q.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) { q.scrollIntoView(); } }
   }
-  window.__serinAsk = ask;
-
-  window.addEventListener('message', function(e){
-    if (e.origin !== O || e.source !== f.contentWindow) return;
-    var d = e.data || {};
-    if (d.type === 'serinResize' && d.height > 0){ imp(f, 'height', Math.ceil(d.height) + 'px'); unbox(); view(); }
-    if (d.type === 'serinReady') view();
-    if (d.type === 'serinScrollTo') scrollToY(d.top);
-    if (d.type === 'serinOpenInquiry') ask();
-  });
-  window.addEventListener('scroll', view, { passive: true });
-  document.addEventListener('scroll', view, { passive: true, capture: true });
-  window.addEventListener('resize', function(){ unbox(); view(); });
-  f.addEventListener('load', view);
-  unbox(); view();
-  setTimeout(view, 600); setTimeout(view, 2000);
+  window.serinHostX = { unbox: unbox, ask: ask, scrollTo: scrollToY };
+  window.addEventListener('resize', unbox);
+  unbox(); setTimeout(unbox, 1500); setTimeout(unbox, 4000);
 })();
