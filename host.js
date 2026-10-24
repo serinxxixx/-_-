@@ -24,6 +24,36 @@
       }
     }
   }
+  /* phones: let the detail use the full screen width (skip the site's side padding), but never past a box that clips */
+  var CLIP_OK = !!(window.CSS && CSS.supports && CSS.supports('overflow-y', 'clip'));
+  function bleed(){
+    if (!(MOBILE && (window.innerWidth || 1000) < 768)) return;
+    var par = f.parentElement; if (!par) return;
+    var vw = document.documentElement.clientWidth || window.innerWidth;
+    var pr = par.getBoundingClientRect(), pc = getComputedStyle(par);
+    var nl = pr.left + (parseFloat(pc.borderLeftWidth) || 0) + (parseFloat(pc.paddingLeft) || 0);
+    var nr = pr.right - (parseFloat(pc.borderRightWidth) || 0) - (parseFloat(pc.paddingRight) || 0);
+    var L = 0, R = vw;
+    for (var el = par; !stop(el); el = el.parentElement){
+      var cs = getComputedStyle(el);
+      if (cs.overflowX === 'hidden' && cs.overflowY === 'hidden' && CLIP_OK){
+        /* folded boxes ("more" button) keep cutting off the bottom, but no longer the sides */
+        if (cs.display === 'block') imp(el, 'display', 'flow-root');
+        imp(el, 'overflow-x', 'visible'); imp(el, 'overflow-y', 'clip');
+        continue;
+      }
+      if (cs.overflowX !== 'visible'){
+        var r = el.getBoundingClientRect();
+        L = Math.max(L, r.left + (parseFloat(cs.borderLeftWidth) || 0));
+        R = Math.min(R, r.right - (parseFloat(cs.borderRightWidth) || 0));
+      }
+    }
+    if (R - L < nr - nl + 4) return;
+    var ml = Math.round(L - nl) + 'px', wd = Math.round(R - L) + 'px';
+    if (f.style.width !== wd || f.style.marginLeft !== ml){
+      imp(f, 'max-width', 'none'); imp(f, 'width', wd); imp(f, 'margin-left', ml); imp(f, 'margin-right', '0px');
+    }
+  }
   function scroller(){
     for (var el = f.parentElement; !stop(el); el = el.parentElement){
       var cs = getComputedStyle(el);
@@ -70,6 +100,7 @@
     var q = document.getElementById('cont_qna') || document.getElementById('ankerQ');
     if (q){ try { q.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) { q.scrollIntoView(); } }
   }
+  var unbox0 = unbox; unbox = function(){ unbox0(); bleed(); };
   window.serinHostX = { unbox: unbox, ask: ask, scrollTo: scrollToY };
   window.addEventListener('resize', unbox);
   unbox(); setTimeout(unbox, 1500); setTimeout(unbox, 4000);
