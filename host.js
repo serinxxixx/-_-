@@ -11,6 +11,14 @@
   imp(f, 'display', 'block'); imp(f, 'width', '100%'); imp(f, 'max-width', '100%');
   imp(f, 'max-height', 'none'); imp(f, 'min-height', '0'); imp(f, 'border', '0');
   try { f.setAttribute('scrolling', 'no'); } catch (e) {}
+  /* YouTube full screen inside the detail page needs the outer frame to allow it (older Artmug snippets did not) */
+  try {
+    if (!f.hasAttribute('allowfullscreen') || !/fullscreen/.test(f.getAttribute('allow') || '')){
+      f.setAttribute('allowfullscreen', '');
+      f.setAttribute('allow', 'clipboard-write; fullscreen; autoplay; encrypted-media; picture-in-picture');
+      var s0 = f.src; if (s0){ f.src = s0; } // permissions apply on the next load
+    }
+  } catch (e) {}
 
   /* a small scroll box around the detail traps finger scrolling on phones: let the whole page scroll instead */
   function unbox(){
